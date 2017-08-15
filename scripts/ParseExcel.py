@@ -8,7 +8,7 @@ class ExcelParser(object):
 		cwd 			= os.getcwd()
 		self.data_path 	= os.path.join(cwd, data_path)
 
-	def read(self, excel_obj):
+	def read(self, excel):
 		file 	= os.path.join(self.data_path, excel.getFileName())
 		res 	= pd.read_excel(file, sheetname=excel.getSheetName(), skiprows=excel.getSkipRows())
 		res.fillna(0, inplace=True)
@@ -18,5 +18,3 @@ if __name__ == "__main__":
 	parser 	= ExcelParser(os.path.join("..", "data"))
 	excel 	= Excel().setFileName("environ.xlsx").setSheetName("Data").SkipRows(3)
 	res 	= parser.read(excel)
-	import IPython
-	IPython.embed()
