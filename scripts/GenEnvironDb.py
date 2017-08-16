@@ -44,7 +44,7 @@ class DbConnector(object):
 						name 	varchar(100) 	NOT NULL,
 						region 	varchar(50) 	NOT NULL,
 						inc_grp varchar(50),
-						notes 	varchar(400),
+						notes 	varchar(40000),
 
 						PRIMARY KEY(code)
 					);
@@ -59,9 +59,9 @@ class DbConnector(object):
 				"""
 					CREATE TABLE indicators
 					(
-						code 	varchar(5)		NOT NULL,
-						name 	varchar(100) 	NOT NULL,
-						notes 	varchar(400),
+						code 	varchar(20)		NOT NULL,
+						name 	varchar(1000) 	NOT NULL,
+						notes 	varchar(40000),
 
 						PRIMARY KEY(code)
 					);
@@ -77,7 +77,7 @@ class DbConnector(object):
 					CREATE TABLE historical_data
 					(
 						country_code 	varchar(5)		NOT NULL,
-						indicator_code 	varchar(100) 	NOT NULL,
+						indicator_code 	varchar(20) 	NOT NULL,
 						FOREIGN KEY(country_code) REFERENCES Countries(code),
 						FOREIGN KEY(indicator_code) REFERENCES Indicators(code)
 					);
@@ -87,7 +87,7 @@ class DbConnector(object):
 			for i in range(1960, 2016):
 				self.cursor.execute(
 					"""
-						ALTER TABLE historical_data ADD COLUMN {0} decimal(4,4) NOT NULL;
+						ALTER TABLE historical_data ADD COLUMN {0} decimal(30,4) NOT NULL;
 					""".format("y_" + str(i))
 					)
 
@@ -97,7 +97,64 @@ class DbConnector(object):
 		self.__buildTableHistoricalData()
 		self.db.commit()
 
-	def fillHistoricalData(self, cnt_code, ind_code, )
+	def fillContries(self, cnt_code, cnt_name, region, inc_grp, notes):
+		self.cursor.execute(
+			"""
+				INSERT INTO countries VALUES ('{0}', '{1}', '{2}', '{3}', '{4}');
+			""".format(cnt_code, cnt_name, region, inc_grp, notes).encode('utf-8')
+			)
+		pass
+
+	def fillCountriesChunk(self, cnt_code, cnt_name, region, inc_grp, notes, chunk_size):
+		data_len 	= len(cnt_code)
+
+		for i in xrange(0, data_len, chunk_size):
+			self.cursor.execute(""" BEGIN TRANSACTION; """)
+			
+			for j in range(i, min(i + chunk_size, data_len)):
+				self.fillContries(cnt_code[j], cnt_name[j], region[j], inc_grp[j], notes[j])
+
+			self.cursor.execute(""" COMMIT; """)
+
+
+	def fillIndicators(self, ind_code, ind_name, notes):
+		self.cursor.execute(
+			"""
+				INSERT INTO indicators VALUES ('{0}', '{1}', '{2}');
+			""".format(ind_code, ind_name, notes).encode('utf-8')
+			)
+		pass
+
+	def fillIndicatorsChunk(self, ind_code, ind_name, notes, chunk_size):
+		data_len 	= len(ind_code)
+
+		for i in xrange(0, data_len, chunk_size):
+			self.cursor.execute(""" BEGIN TRANSACTION; """)
+			
+			for j in range(i, min(i + chunk_size -1, data_len)):
+				self.fillIndicators(ind_code[j], ind_name[j], notes[j])
+
+			self.cursor.execute(""" COMMIT; """)
+
+
+	def fillHD(self, cnt_code, ind_code, data):
+		self.cursor.execute(
+			"""
+				INSERT INTO historical_data VALUES ('{0}', '{1}', {2});
+			""".format(cnt_code, ind_code, ",".join(str(round(i, 3)) for i in data))
+			)
+		pass
+
+	def fillHDChunk(self, cnt_code, ind_code, data, chunk_size):
+		data_len 	= len(cnt_code)
+
+		for i in xrange(0, data_len, chunk_size):
+			self.cursor.execute(""" BEGIN TRANSACTI	ON; """)
+
+			for j in range(i, min(i + chunk_size -1, data_len)):
+				self.fillHD(cnt_code[j], ind_code[j], data.ix[j])
+
+			self.cursor.execute(""" COMMIT; """)
 
 if __name__ == "__main__":
 	with DbConnector("environ", "ilumone", "ilumone") as db:
