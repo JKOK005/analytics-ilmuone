@@ -9,4 +9,6 @@ function res = Analyse(conn, country_code, indicator_code, start_yr)
   title(sprintf("Country: %s", char(cnt(1,2))), 'fontsize', 15);
   xlabel("Years", 'fontsize', 15);
   ylabel(char(ind(1,2)), 'fontsize', 15);
+  
+  saveas(f1, 'smpl.png');
 end

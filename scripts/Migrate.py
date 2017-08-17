@@ -8,14 +8,21 @@ if __name__ == "__main__":
 
 	with DbConnector("environ", "ilumone", "ilumone") as db:
 		# Migrate countries data
-		excel 	= Excel().setFileName("environ.xlsx").setSheetName("Metadata - Countries").SkipRows(0)
-		res 	= parser.read(excel)
-		db.fillCountriesChunk(res['Country Code'], res['Country Name'], res['Region'], res['IncomeGroup'], res['SpecialNotes'], 100)
+		try:
+			excel 	= Excel().setFileName("environ.xlsx").setSheetName("Metadata - Countries").SkipRows(0)
+			res 	= parser.read(excel)
+			db.fillCountriesChunk(res['Country Code'], res['Country Name'], res['Region'], res['IncomeGroup'], res['SpecialNotes'], 100)
+		except Exception as e:
+			pass
 		
+
 		# Migrate indicators data
-		excel 	= Excel().setFileName("environ.xlsx").setSheetName("Metadata - Indicators").SkipRows(0)
-		res 	= parser.read(excel)
-		db.fillIndicatorsChunk(res['INDICATOR_CODE'], res['INDICATOR_NAME'], res['SOURCE_NOTE'], 100)
+		try:
+			excel 	= Excel().setFileName("environ.xlsx").setSheetName("Metadata - Indicators").SkipRows(0)
+			res 	= parser.read(excel)
+			db.fillIndicatorsChunk(res['INDICATOR_CODE'], res['INDICATOR_NAME'], res['SOURCE_NOTE'], 100)
+		except Exception as e:
+			pass
 
 		# Migrate historical data
 		excel 	= Excel().setFileName("environ.xlsx").setSheetName("Data").SkipRows(3)
