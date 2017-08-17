@@ -87,7 +87,7 @@ class DbConnector(object):
 			for i in range(1960, 2016):
 				self.cursor.execute(
 					"""
-						ALTER TABLE historical_data ADD COLUMN {0} decimal(30,4) NOT NULL;
+						ALTER TABLE historical_data ADD COLUMN {0} FLOAT NOT NULL;
 					""".format("y_" + str(i))
 					)
 
@@ -149,7 +149,7 @@ class DbConnector(object):
 		data_len 	= len(cnt_code)
 
 		for i in xrange(0, data_len, chunk_size):
-			self.cursor.execute(""" BEGIN TRANSACTI	ON; """)
+			self.cursor.execute(""" BEGIN TRANSACTION; """)
 
 			for j in range(i, min(i + chunk_size -1, data_len)):
 				self.fillHD(cnt_code[j], ind_code[j], data.ix[j])
